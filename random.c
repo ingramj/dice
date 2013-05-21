@@ -14,7 +14,7 @@ seed_random(void)
 	seed ^= (seed >> 11);
 	seed ^= (seed << 9);
 
-	printf("seed = %u\n", seed);
+	fprintf(stderr, "seed = %u\n", seed);
 	srandom(seed);
 }
 
