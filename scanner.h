@@ -6,12 +6,14 @@
  */
 #define DICE_OP  -1
 #define KEEP_OP  -2
-#define ADD_OP   -3
-#define SUB_OP   -4
-#define LPAREN   -5
-#define RPAREN   -6
-#define ENDLINE  -7
-#define ENDINPUT -8
+#define MUL_OP   -3
+#define DIV_OP   -4
+#define ADD_OP   -5
+#define SUB_OP   -6
+#define LPAREN   -7
+#define RPAREN   -8
+#define ENDLINE  -9
+#define ENDINPUT -10
 
 int get_token(void);
 

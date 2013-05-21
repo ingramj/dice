@@ -29,6 +29,12 @@ get_token(void)
 	case 'k': case 'K':
 		tok = KEEP_OP;
 		break;
+	case '*':
+		tok = MUL_OP;
+		break;
+	case '/':
+		tok = DIV_OP;
+		break;
 	case '+':
 		tok = ADD_OP;
 		break;

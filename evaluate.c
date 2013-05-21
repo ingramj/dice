@@ -37,7 +37,7 @@ static int op_stack[OP_STACK_SIZE];
 static int eval_op(int op);
 
 /* An operator's precedence has index = -token - 1. */
-static int precedence[] = { 10, 9, 8, 8, 0, 0 };
+static int precedence[] = { 10, 9, 8, 8, 7, 7, 0, 0 };
 
 
 int
@@ -241,6 +241,19 @@ clean_seq_stack(void)
 }
 
 
+/* Helper-macro for operator evaluation. The argument should be some C
+ * operator (+, -, *, or /). */
+#define DO_ARITH(op) \
+	do { \
+		n2 = seq_stack[seq_stack_p - 1].sum; \
+		pop_seq_stack(); \
+		n1 = seq_stack[seq_stack_p - 1].sum; \
+		pop_seq_stack(); \
+		addto_seq(&seq_stack[seq_stack_p], n1 op n2);	  \
+		seq_stack_p++;	  \
+	} while (0)
+
+
 static int
 eval_op(int op)
 {
@@ -280,21 +293,17 @@ eval_op(int op)
 		seq_stack_p++;
 		free(s2.vals);
 		break;
+	case MUL_OP:  /* (number number -- number) */
+		DO_ARITH(*);
+		break;
+	case DIV_OP:  /* (number number -- number) */
+		DO_ARITH(/);
+		break;
 	case ADD_OP:  /* (number number -- number) */
-		n2 = seq_stack[seq_stack_p - 1].sum;
-		pop_seq_stack();
-		n1 = seq_stack[seq_stack_p - 1].sum;
-		pop_seq_stack();
-		addto_seq(&seq_stack[seq_stack_p], n1+n2);
-		seq_stack_p++;
+		DO_ARITH(+);
 		break;
 	case SUB_OP:  /* (number number -- number) */
-		n2 = seq_stack[seq_stack_p - 1].sum;
-		pop_seq_stack();
-		n1 = seq_stack[seq_stack_p - 1].sum;
-		pop_seq_stack();
-		addto_seq(&seq_stack[seq_stack_p], n1-n2);
-		seq_stack_p++;
+		DO_ARITH(-);
 		break;
 	default:
 		fprintf(stderr, "unrecognized operation\n");
