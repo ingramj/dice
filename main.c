@@ -2,19 +2,26 @@
 #include "random.h"
 #include "scanner.h"
 #include <stdio.h>
+#include <unistd.h>
+
+static void print_banner(void)
+{
+	fprintf(stderr, "Dice Roller v0.1\n"
+	        "Copyright (c) 2013 Jim Ingram <ingramj@gmail.com>\n"
+	        "ctrl-d to quit\n");
+}
 
 int
 main(void)
 {
-	printf("Dice Roller v0.1\n");
-	printf("ctrl-d to quit\n");
+	print_banner();
 	seed_random();
-	printf("> ");
+	fprintf(stderr, "> ");
 	while (evaluate() >= 0) {
-		printf("> ");
+		fprintf(stderr, "> ");
 	}
 
-	printf("\n");
+	fprintf(stderr, "\n");
 	cleanup_evaluator();
 	return 0;
 }
