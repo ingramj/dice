@@ -6,6 +6,16 @@
 int
 main(void)
 {
-	evaluate();
+	int tok;
+	printf("> ");
+	while ((tok = get_token()) != ENDINPUT) {
+		if (tok >= 0) {
+			printf("INTEGER: %d\n", tok);
+		} else if (tok != ENDLINE) {
+			printf("TOKEN:   %d\n", tok);
+		} else {
+			printf("> ");
+		}
+	}
 	return 0;
 }

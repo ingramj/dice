@@ -9,7 +9,7 @@ int
 get_token(void)
 {
 	int peek;
-	int tok = END;
+	int tok = ENDINPUT;
 
 	do {
 		peek = getc(stdin);
@@ -38,14 +38,27 @@ get_token(void)
 	case ')':
 		tok = RPAREN;
 		break;
-	case EOF: case '\n':
-		tok = END;
+	case '\n':
+		tok = ENDLINE;
+		break;
+	case EOF:
+		tok = ENDINPUT;
 		break;
 	default:
 		fprintf(stderr, "unrecognized character\n");
 	}
 
 	return tok;
+}
+
+
+/* isdigit() depends on locale, but we only want ASCII digits. */
+static int
+digit(int c)
+{
+	return (c == '0' || c == '1' || c == '2' || c == '3' ||
+	        c == '4' || c == '5' || c == '6' || c == '7' ||
+	        c == '8' || c == '9');
 }
 
 
@@ -60,18 +73,22 @@ read_int(char first)
 	buf[10] = '\0';
 	for (i = 1; i < 10; i++) {
 		peek = getc(stdin);
-		switch (peek) {
-		case '0': case '1': case '2': case '3': case '4':
-		case '5': case '6': case '7': case '8': case '9':
+		if (digit(peek)) {
 			buf[i] = peek;
-			break;
-		default:
+		} else {
 			buf[i] = '\0';
-			ungetc(peek, stdin);
 			break;
 		}
-		if (buf[i] == '\0') break;
 	}
+
+	if (i == 10) {
+		peek = getc(stdin);
+		if (digit(peek)) {
+			fprintf(stderr, "integer constant has too many digits\n");
+			return ENDINPUT;
+		}
+	}
+	ungetc(peek, stdin);
 
 	return atoi(buf);
 }
