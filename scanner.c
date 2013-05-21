@@ -20,6 +20,9 @@ get_token(void)
 	case '5': case '6': case '7': case '8': case '9':
 		tok = read_int(peek);
 		break;
+	case '%':
+		tok = 100;
+		break;
 	case 'd': case 'D':
 		tok = DICE_OP;
 		break;
