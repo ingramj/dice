@@ -56,7 +56,7 @@ evaluate(void)
 				seq_stack_p++;
 			} else {
 				fprintf(stderr, "sequence stack overflow\n");
-				return -1;
+				goto error;
 			}
 		} else if (tok >= SUB_OP) {
 			/* If it is an operator, then while there are operators on the
@@ -65,30 +65,30 @@ evaluate(void)
 				int cur_prec = precedence[-tok - 1];
 				int top_op = op_stack[op_stack_p - 1];
 				int top_prec = precedence[-top_op - 1];
-				/* of greater or equal precedence: */
+				/* of greater or equal precedence... */
 				if (top_prec < cur_prec) {
 					break;
 				}
-				/* (1) pop off the other operators and evaluate them, */
+				/* pop off the other operators and evaluate them, */
 				op_stack_p--;
 				if (eval_op(top_op) < 0) {
-					return -1;
+					goto error;
 				}
 			}
-			/* (2) and then push the original operator. */
+			/* Push the original operator. */
 			if (op_stack_p < OP_STACK_SIZE) {
 				op_stack[op_stack_p++] = tok;
 			} else {
 				fprintf(stderr, "operator stack overflow\n");
-				return -1;
+				goto error;
 			}
 		} else if (tok == LPAREN) {
-			/* If it is a left parenthesis, push it onto the operator stack. */
+			/* If it is a left parenthesis, push it onto the stack. */
 			if (op_stack_p < OP_STACK_SIZE) {
 				op_stack[op_stack_p++] = tok;
 			} else {
 				fprintf(stderr, "operator stack overflow\n");
-				return -1;
+				goto error;
 			}
 		} else if (tok == RPAREN) {
 			/* If it is a right parenthesis, then pop operators and
@@ -103,12 +103,12 @@ evaluate(void)
 				}
 				op_stack_p--;
 				if (eval_op(top_op) < 0) {
-					return -1;
+					goto error;
 				}
 			}
 			if (!matched) {
 				fprintf(stderr, "mismatched parentheses\n");
-				return -1;
+				goto error;
 			}
 		}
 		tok = get_token();
@@ -120,17 +120,18 @@ evaluate(void)
 		int top_op = op_stack[op_stack_p - 1];
 		if (top_op == LPAREN || top_op == RPAREN) {
 			fprintf(stderr, "mismatched parentheses\n");
-			return -1;
+			goto error;
 		}
 		op_stack_p--;
 		if (eval_op(top_op) < 0) {
-			return -1;
+			goto error;
 		}
 	}
 
 	if (seq_stack_p > 1) {
 		fprintf(stderr, "%d values left on the sequence stack; should be 1\n",
 			seq_stack_p);
+		/* this means the evaluation went wrong, and we should exit */
 		return -1;
 	} else if (seq_stack_p == 0) {
 		return -1;
@@ -143,6 +144,10 @@ evaluate(void)
 		return 0;
 	}
 	return -1;
+
+error:
+	cleanup_evaluator();
+	return 1;
 }
 
 
@@ -227,10 +232,12 @@ clean_seq_stack(void)
 	int i;
 
 	for (i = 0; i < SEQ_STACK_SIZE; i++) {
-		if (seq_stack[i].vals != NULL) {
+		if (seq_stack[i].cap > 0) {
+			seq_stack[i].cap = 0;
 			free(seq_stack[i].vals);
 		}
 	}
+	seq_stack_p = 0;
 }
 
 
