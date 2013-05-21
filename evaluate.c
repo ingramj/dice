@@ -40,6 +40,14 @@ static int eval_op(int op);
 static int precedence[] = { 10, 9, 8, 8, 7, 7, 0, 0 };
 
 
+/* Error reporting/recovery macro */
+#define check(cond, msg) \
+	do { \
+	if (!(cond)) { \
+		fprintf(stderr, "%s\n", msg); \
+		goto error; \
+	}} while (0)
+
 int
 evaluate(void)
 {
@@ -51,13 +59,9 @@ evaluate(void)
 	while (tok != ENDLINE && tok != ENDINPUT) {
 		if (tok >= 0) {
 			/* If it is a number, add it to the sequence stack. */
-			if (seq_stack_p < SEQ_STACK_SIZE) {
-				addto_seq(&seq_stack[seq_stack_p], tok);
-				seq_stack_p++;
-			} else {
-				fprintf(stderr, "sequence stack overflow\n");
-				goto error;
-			}
+			check(seq_stack_p < SEQ_STACK_SIZE, "sequence stack overflow");
+			addto_seq(&seq_stack[seq_stack_p], tok);
+			seq_stack_p++;
 		} else if (tok >= SUB_OP) {
 			/* If it is an operator, then while there are operators on the
 			 * stack... */
@@ -76,24 +80,17 @@ evaluate(void)
 				}
 			}
 			/* Push the original operator. */
-			if (op_stack_p < OP_STACK_SIZE) {
-				op_stack[op_stack_p++] = tok;
-			} else {
-				fprintf(stderr, "operator stack overflow\n");
-				goto error;
-			}
+			check(op_stack_p < OP_STACK_SIZE, "operator stack overflow");
+			op_stack[op_stack_p++] = tok;
 		} else if (tok == LPAREN) {
 			/* If it is a left parenthesis, push it onto the stack. */
-			if (op_stack_p < OP_STACK_SIZE) {
-				op_stack[op_stack_p++] = tok;
-			} else {
-				fprintf(stderr, "operator stack overflow\n");
-				goto error;
-			}
+			check(op_stack_p < OP_STACK_SIZE, "operator stack overflow");
+			op_stack[op_stack_p++] = tok;
 		} else if (tok == RPAREN) {
 			/* If it is a right parenthesis, then pop operators and
 			 * evaluate them until a match is found. */
 			int matched = 0;
+			int op_count = 0;
 			while (op_stack_p > 0) {
 				int top_op = op_stack[op_stack_p - 1];
 				if (top_op == LPAREN) {
@@ -101,15 +98,14 @@ evaluate(void)
 					op_stack_p--;
 					break;
 				}
+				op_count++;
 				op_stack_p--;
 				if (eval_op(top_op) < 0) {
 					goto error;
 				}
 			}
-			if (!matched) {
-				fprintf(stderr, "mismatched parentheses\n");
-				goto error;
-			}
+			check(op_count > 0, "missing operator");
+			check(matched, "mismatched parentheses");
 		}
 		tok = get_token();
 	}
@@ -118,10 +114,7 @@ evaluate(void)
 	 * operators and evaluate them. */
 	while (op_stack_p > 0) {
 		int top_op = op_stack[op_stack_p - 1];
-		if (top_op == LPAREN || top_op == RPAREN) {
-			fprintf(stderr, "mismatched parentheses\n");
-			goto error;
-		}
+		check(top_op != LPAREN && top_op != RPAREN, "mismatched parentheses");
 		op_stack_p--;
 		if (eval_op(top_op) < 0) {
 			goto error;
@@ -146,6 +139,7 @@ evaluate(void)
 	return -1;
 
 error:
+	/* Reset the interpreter to a known state. */
 	cleanup_evaluator();
 	return 1;
 }
@@ -155,6 +149,7 @@ void
 cleanup_evaluator(void)
 {
 	clean_seq_stack();
+	op_stack_p = 0;
 }
 
 
@@ -249,8 +244,8 @@ clean_seq_stack(void)
 		pop_seq_stack(); \
 		n1 = seq_stack[seq_stack_p - 1].sum; \
 		pop_seq_stack(); \
-		addto_seq(&seq_stack[seq_stack_p], n1 op n2);	  \
-		seq_stack_p++;	  \
+		addto_seq(&seq_stack[seq_stack_p], n1 op n2); \
+		seq_stack_p++; \
 	} while (0)
 
 
