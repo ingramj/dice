@@ -3,9 +3,9 @@ Dice: An interactive dice roller
 
 Dice reads in expressions in a subset of [dice notation][] from stdin,
 evaluates them, and prints the result to stdout. It works like a
-regular calculator supporting addition, subtraction, and parentheses,
-along with two additional operators: `d` (for "dice"), and `k` (for
-"keep").
+regular calculator supporting basic arithmetic (+, -, *, and /) and
+parentheses, along with two additional operators: `d` (for "dice"),
+and `k` (for "keep").
 
 The "dice" operator requires two operands, which may be arbitrarily
 complex expressions. Omitting an operand is an error.
@@ -26,17 +26,16 @@ The left operand should be a dice expression:
     4d6k3 + 1   # so does this
     (4d6+1)k3   # this does not
 
-The `k` operator has a higher precedence than addition or subtraction,
-but lower than `d`.
+The `k` operator has a higher precedence than the arithmetic
+operators, but lower than `d`.
 
 If you wish to use dice non-interactively, you can pipe an expression
-into it. If you do that, you'll probably want to redirect stderr to
-/dev/null, to avoid extra output:
+into it. You'll probably want to redirect stderr to /dev/null, to
+avoid extraneous output:
 
     $ echo "2d6+1d4+2" | ./dice 2> /dev/null
 
+I wrote this in two days, so there are probably bugs.
 
-I wrote this over the weekend, so there are probably bugs. Especially
-in the evaluator; it's a bit of a mess.
 
 [dice notation]: http://en.wikipedia.org/wiki/Dice_notation
