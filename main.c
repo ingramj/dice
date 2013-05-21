@@ -6,16 +6,15 @@
 int
 main(void)
 {
-	int tok;
+	printf("Dice Roller v0.1\n");
+	printf("ctrl-d to quit\n");
+	seed_random();
 	printf("> ");
-	while ((tok = get_token()) != ENDINPUT) {
-		if (tok >= 0) {
-			printf("INTEGER: %d\n", tok);
-		} else if (tok != ENDLINE) {
-			printf("TOKEN:   %d\n", tok);
-		} else {
-			printf("> ");
-		}
+	while (evaluate() >= 0) {
+		printf("> ");
 	}
+
+	printf("\n");
+	cleanup_evaluator();
 	return 0;
 }
