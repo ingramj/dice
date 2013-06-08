@@ -6,7 +6,7 @@
 
 static void print_banner(void)
 {
-	fprintf(stderr, "Dice Roller v0.1\n"
+	fprintf(stderr, "Dice Roller v0.1.1\n"
 	        "Copyright (c) 2013 Jim Ingram <ingramj@gmail.com>\n"
 	        "ctrl-d to quit\n");
 }

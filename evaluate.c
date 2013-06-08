@@ -231,6 +231,7 @@ clean_seq_stack(void)
 			seq_stack[i].cap = 0;
 			free(seq_stack[i].vals);
 		}
+		seq_stack[i].size = seq_stack[i].sum = 0;
 	}
 	seq_stack_p = 0;
 }
