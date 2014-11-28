@@ -1,15 +1,17 @@
-CC      := clang
-CFLAGS  := -std=c89 -Wall -Wextra -pedantic -D_XOPEN_SOURCE=500 -g
-LDFLAGS := -g
+PROG := dice
+SRCS := main.c evaluate.c scanner.c random.c
 
-TARGET = dice
-OBJS   = main.o evaluate.o random.o scanner.o
-DEPS   = $(OBJS:.o=.d)
+CC      := cc
+CFLAGS  := -Wall -Wextra -Werror
+LDFLAGS :=
+
+OBJS   = $(SRCS:.c=.o)
+DEPS   = $(SRCS:.c=.d)
 
 .PHONY: all
-all: $(TARGET)
+all: $(PROG)
 
-$(TARGET): $(OBJS)
+$(PROG): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
@@ -22,4 +24,4 @@ clean:
 	rm -f $(OBJS) $(DEPS)
 
 cleaner: clean
-	rm -f $(TARGET)
+	rm -rf $(PROG)
