@@ -270,6 +270,10 @@ eval_op(int op)
 		pop_seq_stack();
 		n1 = seq_stack[seq_stack_p - 1].sum;
 		pop_seq_stack();
+		if (n2 == 0) {
+			fprintf(stderr, "cannot roll a zero-sided die\n");
+			return -1;
+		}
 		for (i = 0; i < n1; i++) {
 			addto_seq(&seq_stack[seq_stack_p], random_range(1, n2+1));
 		}
@@ -293,6 +297,10 @@ eval_op(int op)
 		DO_ARITH(*);
 		break;
 	case DIV_OP:  /* (number number -- number) */
+		if (seq_stack[seq_stack_p - 1].sum == 0) {
+			fprintf(stderr, "attempted to divide by 0\n");
+			return -1;
+		}
 		DO_ARITH(/);
 		break;
 	case ADD_OP:  /* (number number -- number) */

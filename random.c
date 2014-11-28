@@ -24,6 +24,12 @@ random_range(int min, int max)
 {
 	int range, bucket, remainder, r;
 
+	if (min == max) {
+		return -1;
+	} else if (min == max - 1) {
+		return min;
+	}
+
 	range = max - min;
 	bucket = RAND_MAX / range;
 	remainder = RAND_MAX % range;
