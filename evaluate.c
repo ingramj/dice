@@ -181,9 +181,13 @@ copyn_seq(seq_t *dest, seq_t *src, int num)
 	assert(dest != NULL);
 	assert(src != NULL);
 
-	if (num > src->size) {
-		fprintf(stderr, "can't keep %d dice, there are only %d!\n",
-		        num, src->size);
+	if (src->size == 0 && num != 0) {
+		fprintf(stderr, "there aren't any dice to keep!\n");
+		return -1;
+	} else if (num > src->size) {
+		fprintf(stderr, "can't keep %d %s, there %s only %d!\n",
+		        num, num == 1 ? "die" : "dice",
+		        src->size == 1 ? "is" : "are", src->size);
 		return -1;
 	}
 
